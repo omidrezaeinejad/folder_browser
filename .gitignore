@@ -4,3 +4,6 @@ wwwroot
 src/bin
 src/.vscode
 src/obj
+
+dist/linux.x64
+dist/win.x64
