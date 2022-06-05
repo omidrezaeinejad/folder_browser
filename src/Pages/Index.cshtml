@@ -1,0 +1,64 @@
+﻿@{
+    string appTitle = ViewData["app.title"] as string;
+    string folderTitle = ViewData["folderTitle"] as string;
+    string folderName = ViewData["folderName"] as string;
+    bool isRoot = string.IsNullOrWhiteSpace(folderName);
+    string parentFolder = ViewData["parentFolder"] as string;
+    List<FileSystemItem> items = ViewData["folder_content"] as List<FileSystemItem>;
+    ViewData["Title"] = folderTitle;
+}
+
+<div style="padding-top: 20px;">
+    <div class="titlebar-wrapper">
+        <span>@appTitle</span>
+    </div>
+    <div class="curr-path-wrapper">
+        @if (!isRoot)  
+        {
+            <a class="go-back-button" href="@parentFolder"><span class="fa fa-arrow-left"></span></a>
+        }
+        <span>@folderTitle</span>
+    </div>
+    <div class="folder-contents-wrapper">
+        <table class="content-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date modified</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+        @foreach (var item in items)
+        {
+            <tr class="folder-content-table-row">
+                <td>
+                    @if (item.IsFolder)
+                    {
+                        <div class="dir-content-item dir-content-folder">
+                            <a class="content-item-link" href="@item.Url">
+                                <img src="/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
+                                <span>@item.Name</span>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="dir-content-item dir-content-file">
+                            <a class="content-item-link" href="@item.Url" target="_blank">
+                                <img src="/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
+                                <span>@item.Name</span>
+                            </a>
+                        </div>
+                    }
+                </td>
+                <td class="content-item-date-modified">@item.LastModifyDate?.ToString("M/d/yyyy h:mm tt")</td>
+                <td>@item.Type</td>
+                <td>@item.SizeStr</td>
+            </tr>
+        }
+            </tbody>
+        </table>
+    </div>
+</div>
