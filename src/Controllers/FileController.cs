@@ -67,7 +67,6 @@ public class FileController : Controller
                 Stream fileStream = System.IO.File.OpenRead(targetFolder);
                 string contentType = MimeHelper.GetMimeTypeFromFilename(targetFolder);
                 FileResult fileResult = File(fileStream, contentType);
-                Response.Headers.Add("temp-my", $"src: {targetFolder}");
                 return fileResult;
             }
 
