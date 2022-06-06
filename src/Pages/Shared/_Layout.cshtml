@@ -7,11 +7,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@appTitle - @ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/folder_browser.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/content/font-awesome/css/font-awesome.min.css" asp-append-version="false" />
-    <link rel="stylesheet" href="~/css/theme.dark.css" asp-append-version="true" />
+    <link rel="stylesheet" href="@GlobalScope.APP_CONTENT_URL_PREFIX/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="@GlobalScope.APP_CONTENT_URL_PREFIX/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="@GlobalScope.APP_CONTENT_URL_PREFIX/content/font-awesome/css/font-awesome.css" asp-append-version="false" />
+    <link rel="stylesheet" href="@GlobalScope.APP_CONTENT_URL_PREFIX/css/theme.dark.css" asp-append-version="true" />
 </head>
 <body>
     <div class="container">
@@ -20,9 +19,9 @@
         </main>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="@GlobalScope.APP_CONTENT_URL_PREFIX/lib/jquery/dist/jquery.min.js"></script>
+    <script src="@GlobalScope.APP_CONTENT_URL_PREFIX/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="@GlobalScope.APP_CONTENT_URL_PREFIX/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

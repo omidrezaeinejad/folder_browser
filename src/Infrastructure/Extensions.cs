@@ -16,12 +16,7 @@ public static class Extensions
 
     public static string GetMappedFolder(this PathString path)
     {
-        List<string> requestPathParts = (path.Value ?? "")
-            .Split('/')
-            .Select(e => e.Split('\\'))
-            .SelectMany(e => e)
-            .Where(e => !string.IsNullOrWhiteSpace(e))
-            .ToList();
+        List<string> requestPathParts = (path.Value ?? "").GetFilePathParts().ToList();
         requestPathParts.Insert(0, AppConfigSection.Current?.RootPath ?? ".");
         string dirPath = Path.GetFullPath(Path.Combine(requestPathParts.ToArray()));
         return dirPath;
@@ -34,13 +29,19 @@ public static class Extensions
         string lowerRoot = AppConfigSection.Current?.RootPath?.ToLower() ?? "";
         if (!lowerPath.StartsWith(lowerRoot)) return "/";
         string relativePath = filepath.Substring(AppConfigSection.Current?.RootPath?.Length ?? 0).Trim('/');
-        List<string> pathParts = (relativePath ?? "")
+        List<string> pathParts = (relativePath ?? "").GetFilePathParts().ToList();
+        string webAddress = $"/{string.Join("/", pathParts)}";
+        return webAddress;
+    }
+
+    public static IEnumerable<string> GetFilePathParts(this PathString path) => GetFilePathParts(path.Value ?? "");
+    public static IEnumerable<string> GetFilePathParts(this string path)
+    {
+        var requestPathParts = (path ?? "")
             .Split('/')
             .Select(e => e.Split('\\'))
             .SelectMany(e => e)
-            .Where(e => !string.IsNullOrWhiteSpace(e))
-            .ToList();
-        string webAddress = $"/{string.Join("/", pathParts)}";
-        return webAddress;
+            .Where(e => !string.IsNullOrWhiteSpace(e));
+        return requestPathParts;
     }
 }

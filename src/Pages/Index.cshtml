@@ -38,7 +38,7 @@
                     {
                         <div class="dir-content-item dir-content-folder">
                             <a class="content-item-link" href="@item.Url">
-                                <img src="/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
+                                <img src="@GlobalScope.APP_CONTENT_URL_PREFIX/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
                                 <span>@item.Name</span>
                             </a>
                         </div>
@@ -47,7 +47,7 @@
                     {
                         <div class="dir-content-item dir-content-file">
                             <a class="content-item-link" href="@item.Url" target="_blank">
-                                <img src="/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
+                                <img src="@GlobalScope.APP_CONTENT_URL_PREFIX/images/icons/@(item.IconImageFileName)" style="width: 36px;" />
                                 <span>@item.Name</span>
                             </a>
                         </div>
