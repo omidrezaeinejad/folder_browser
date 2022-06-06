@@ -26,7 +26,7 @@ public class BrowserController : Controller
         var task = new Task<IActionResult>(() =>
         {
             var pathParts = taskParams.Request.Path.GetFilePathParts().Where((s,i) => i >= 2).ToList();
-            pathParts.Insert(0, hostingEnvironment.WebRootPath);
+            pathParts.Insert(0, taskParams.WebHostingEnvironment.WebRootPath);
             var filePath = Path.GetFullPath(Path.Combine(pathParts.ToArray()));
             if (!System.IO.File.Exists(filePath)) return NotFound();
             var stream = System.IO.File.OpenRead(filePath);
