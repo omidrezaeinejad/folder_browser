@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 [Route("")]
 public class FileController : Controller
 {
-    private static SortedDictionary<string, string> _fileIcons;
-    private Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment;
+    private static SortedDictionary<string, string>? _fileIcons;
+    private Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment;
     private static object _iconsLoadLock = new object();
-    public FileController(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+    public FileController(Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
     {
         hostingEnvironment = env;
         LoadIcons();
@@ -40,8 +40,8 @@ public class FileController : Controller
     private string GetFileIcon(string filename)
     {
         string ext = Path.GetExtension(filename).ToLower();
-        string imageFile = null;
-        _fileIcons.TryGetValue(ext, out imageFile);
+        string? imageFile = null;
+        _fileIcons?.TryGetValue(ext, out imageFile);
         if (string.IsNullOrWhiteSpace(imageFile))
             imageFile = "icon-file-1.png";
         return imageFile;
@@ -52,62 +52,73 @@ public class FileController : Controller
     [Route("{*items}")]
     public async Task<IActionResult> ListDir()
     {
-        try
+        var taskParams = new 
         {
-            ViewData["app.title"] = AppConfigSection.Current.Title;
-            string targetFolder = Request.Path.GetMappedFolder();
-            bool isFile = !Directory.Exists(targetFolder);
-            if (isFile)
-            {
-                if (!System.IO.File.Exists(targetFolder))
-                isFile = false;
-            }
-            if (isFile)
-            {
-                Stream fileStream = System.IO.File.OpenRead(targetFolder);
-                string contentType = MimeHelper.GetMimeTypeFromFilename(targetFolder);
-                FileResult fileResult = File(fileStream, contentType);
-                return fileResult;
-            }
-
-            if (!Directory.Exists(targetFolder)) return Redirect("/");
-
-            string targetFolderName = Path.GetFileName(targetFolder);
-            string webAddress = targetFolder.GetWebAddress();
-            ViewData["folder"] = webAddress;
-            ViewData["parentFolder"] = Path.GetFullPath(Path.Combine(targetFolder, "../")).GetWebAddress();
-            ViewData["folderName"] = "";
-            if (Request.Path != "/")
-                ViewData["folderName"] = targetFolderName;
-
-            string folderTitle = webAddress?.Trim('/');
-            if (string.IsNullOrWhiteSpace(folderTitle))
-                folderTitle = "Home";
-            ViewData["folderTitle"] = folderTitle;
-
-            List<string> folders = Directory.GetDirectories(targetFolder).ToList();
-            List<string> files = Directory.GetFiles(targetFolder).ToList();
-            List<FileSystemItem> fileSystemItems = new List<FileSystemItem>();
-
-            fileSystemItems.AddRange(GetFileSystemItemInfos(folders, files));
-            ViewData["folder_content"] = fileSystemItems;
-            ViewResult viewResult = View("~/Pages/Index.cshtml");
-            return viewResult;
-        }
-        catch (Exception ex)
+            Request = Request,
+            ViewData = ViewData
+        };
+        var task = new Task<IActionResult>(() =>
         {
-            return Content($"Error while gathering directory content({Request.Path}): {ex.Message}");
-        }
+            try
+            {
+                taskParams.ViewData["app.title"] = AppConfigSection.Current.Title;
+                string targetFolder = taskParams.Request.Path.GetMappedFolder();
+                bool isFile = !Directory.Exists(targetFolder);
+                if (isFile)
+                {
+                    if (!System.IO.File.Exists(targetFolder))
+                    isFile = false;
+                }
+                if (isFile)
+                {
+                    Stream fileStream = System.IO.File.OpenRead(targetFolder);
+                    string contentType = MimeHelper.GetMimeTypeFromFilename(targetFolder);
+                    FileResult fileResult = File(fileStream, contentType);
+                    return fileResult;
+                }
+
+                if (!Directory.Exists(targetFolder)) return Redirect("/");
+
+                string targetFolderName = Path.GetFileName(targetFolder);
+                string webAddress = targetFolder.GetWebAddress();
+                taskParams.ViewData["folder"] = webAddress;
+                taskParams.ViewData["parentFolder"] = Path.GetFullPath(Path.Combine(targetFolder, "../")).GetWebAddress();
+                taskParams.ViewData["folderName"] = "";
+                if (Request.Path != "/")
+                    taskParams.ViewData["folderName"] = targetFolderName;
+
+                string? folderTitle = webAddress?.Trim('/');
+                if (string.IsNullOrWhiteSpace(folderTitle))
+                    folderTitle = "Home";
+                taskParams.ViewData["folderTitle"] = folderTitle;
+
+                List<string> folders = Directory.GetDirectories(targetFolder).ToList();
+                List<string> files = Directory.GetFiles(targetFolder).ToList();
+                List<FileSystemItem> fileSystemItems = new List<FileSystemItem>();
+
+                fileSystemItems.AddRange(GetFileSystemItemInfos(folders, files));
+                taskParams.ViewData["folder_content"] = fileSystemItems;
+                ViewResult viewResult = View("~/Pages/Index.cshtml");
+                return viewResult;
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error while gathering directory content({Request.Path}): {ex.Message}");
+            }
+        });
+        task.Start();
+        return await task;
     }
 
     private FileSystemItem GetFileSystemItemInfo(string filePath, bool isFolder)
     {
         string itemName = Path.GetFileName(filePath);
-        FileInfo fileInfo = null;
+        FileInfo? fileInfo = null;
+        DirectoryInfo? directoryInfo = null;
         if (!isFolder)
-        {
             fileInfo = new FileInfo(filePath);
-        }
+        else
+            directoryInfo = new DirectoryInfo(filePath);
         string url = filePath.GetWebAddress();
         string type = isFolder ? "<dir>" : Path.GetExtension(itemName).Trim('.').ToLower();
         string iconFilename = isFolder ? "icon-folder-2.png" : GetFileIcon(itemName);
@@ -118,7 +129,7 @@ public class FileController : Controller
             Url = url,
             SizeStr = fileInfo != null ? fileInfo.Length.GetFileSizeStr() : null,
             Type = type,
-            LastModifyDate = fileInfo?.LastWriteTime,
+            LastModifyDate = isFolder ? directoryInfo?.LastWriteTime : fileInfo?.LastWriteTime,
             IconImageFileName = iconFilename,
         };
         return fileSystemItem;

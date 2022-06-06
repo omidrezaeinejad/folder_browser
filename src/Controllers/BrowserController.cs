@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 [Route(GlobalScope.SYS_CALLS_ROUTE)]
 public class BrowserController : Controller
 {
-    private Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment;
+    private Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment;
     
-    public BrowserController(Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+    public BrowserController(Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
     {
         hostingEnvironment = env;
     }
@@ -18,13 +18,23 @@ public class BrowserController : Controller
     [Route("file/{*items}")]
     public async Task<IActionResult> ServeAppContentFile()
     {
-        var pathParts = Request.Path.GetFilePathParts().Where((s,i) => i >= 2).ToList();
-        pathParts.Insert(0, hostingEnvironment.WebRootPath);
-        var filePath = Path.GetFullPath(Path.Combine(pathParts.ToArray()));
-        if (!System.IO.File.Exists(filePath)) return NotFound();
-        var stream = System.IO.File.OpenRead(filePath);
-        string contentType = MimeHelper.GetMimeTypeFromFilename(filePath);
-        var fileResult = File(stream, contentType);
-        return fileResult; 
+        var taskParams = new
+        {
+            Request = Request,
+            WebHostingEnvironment = hostingEnvironment,
+        };
+        var task = new Task<IActionResult>(() =>
+        {
+            var pathParts = taskParams.Request.Path.GetFilePathParts().Where((s,i) => i >= 2).ToList();
+            pathParts.Insert(0, hostingEnvironment.WebRootPath);
+            var filePath = Path.GetFullPath(Path.Combine(pathParts.ToArray()));
+            if (!System.IO.File.Exists(filePath)) return NotFound();
+            var stream = System.IO.File.OpenRead(filePath);
+            string contentType = MimeHelper.GetMimeTypeFromFilename(filePath);
+            var fileResult = File(stream, contentType);
+            return fileResult; 
+        });
+        task.Start();
+        return await task;
     }
 }

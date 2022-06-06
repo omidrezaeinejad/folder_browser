@@ -1,10 +1,10 @@
 ﻿@{
-    string appTitle = ViewData["app.title"] as string;
-    string folderTitle = ViewData["folderTitle"] as string;
-    string folderName = ViewData["folderName"] as string;
+    string? appTitle = ViewData["app.title"] as string;
+    string? folderTitle = ViewData["folderTitle"] as string;
+    string? folderName = ViewData["folderName"] as string;
     bool isRoot = string.IsNullOrWhiteSpace(folderName);
-    string parentFolder = ViewData["parentFolder"] as string;
-    List<FileSystemItem> items = ViewData["folder_content"] as List<FileSystemItem>;
+    string? parentFolder = ViewData["parentFolder"] as string;
+    List<FileSystemItem>? items = ViewData["folder_content"] as List<FileSystemItem>;
     ViewData["Title"] = folderTitle;
 }
 
@@ -30,7 +30,7 @@
                 </tr>
             </thead>
             <tbody>
-        @foreach (var item in items)
+        @foreach (var item in (items ?? new List<FileSystemItem>()))
         {
             <tr class="folder-content-table-row">
                 <td>

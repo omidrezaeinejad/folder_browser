@@ -15,5 +15,6 @@ app.UseMvc();
 
 app.Configuration.GetSection("app").Bind(AppConfigSection.Current);
 AppConfigSection.Current.RootPath = Path.GetFullPath(AppConfigSection.Current?.RootPath ?? ".");
+AppConfigSection.Current?.Refine();
 
 app.Run();

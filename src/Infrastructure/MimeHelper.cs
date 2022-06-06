@@ -570,7 +570,7 @@ public class MimeHelper
 
         };
 
-        public static string GetMimeType(string extension)
+        public static string GetMimeType(string? extension)
         {
             if (string.IsNullOrWhiteSpace(extension))
                 return "application/octet-stream";
@@ -580,9 +580,7 @@ public class MimeHelper
                 extension = "." + extension;
             }
 
-            string mime;
-
-            return _mappings.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+            return _mappings.TryGetValue(extension, out string? mime) ? mime : "application/octet-stream";
         }
         public static string GetMimeTypeFromFilename(string filename)
         {

@@ -28,7 +28,7 @@ public static class Extensions
         if (string.IsNullOrWhiteSpace(lowerPath)) return "/";
         string lowerRoot = AppConfigSection.Current?.RootPath?.ToLower() ?? "";
         if (!lowerPath.StartsWith(lowerRoot)) return "/";
-        string relativePath = filepath.Substring(AppConfigSection.Current?.RootPath?.Length ?? 0).Trim('/');
+        string? relativePath = filepath?.Substring(AppConfigSection.Current?.RootPath?.Length ?? 0).Trim('/');
         List<string> pathParts = (relativePath ?? "").GetFilePathParts().ToList();
         string webAddress = $"/{string.Join("/", pathParts)}";
         return webAddress;
